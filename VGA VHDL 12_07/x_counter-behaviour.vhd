@@ -5,18 +5,19 @@ use IEEE.numeric_std.ALL;
 architecture behaviour of x_counter is
 signal count, new_count : unsigned(8 downto 0);
 begin
-	--registers die checken of je reset.
 	process(clk)
 	begin
-		if (rising_edge(clk)) then
+		if (clk'event AND clk = '1') then
 			if (reset = '1') then
+			-- after a reset we go to '111111111',
+			-- this way we do not miss the 0 value.
 				count <= (others => '1');
 			else
 				count <= new_count;
 			end if;
 		end if;
 	end process;
-	-- dit berekent de niewe count want dat is ook wel handig in een counter
+	-- simple counter implementation that resets at 399
 	process(count)
 	begin
 		if (count = 399) then
@@ -25,6 +26,7 @@ begin
 			new_count <= count + 1;
 		end if;
 	end process;
+	-- and we map to the output signal
 	x <= std_logic_vector(count);
 end behaviour;
 

@@ -5,34 +5,32 @@ use IEEE.numeric_std.ALL;
 architecture behaviour of y_counter is
 signal count, new_count : unsigned(9 downto 0);
 begin
-	--registers die checken of je reset.
 	process(clk)
 	begin
-		if (rising_edge(clk)) then
+		if (clk'event AND clk ='1') then
 			if (reset = '1') then
-				count <= (others => '1');
+				count <= (others => '0');
 			else
 				count <= new_count;
 			end if;
 		end if;
 	end process;
-	-- we gaan weer tellen
+	-- simple counter implementation based on x counter
 	process(count, x)
 	begin
-	-- alleen maar tellen als x = max waarde
+	-- at max value of x we should add 1
 		if (unsigned(x) = 399) then
-			-- maar als y = max waarde moeten we naar nul
+			-- and then we reset at y = 524
 			if (count = 524) then
 				new_count <= (others => '0');
 			else
 				new_count <= count + 1; 
 			end if;
 		else 
-			-- gewoon voor de zekerheid even een else
 			new_count <= count;
 		end if;
 	end process;
-	-- en dan porten naar de output
+	-- and we map to the output signal
 	y <= std_logic_vector(count);
 end behaviour;
 

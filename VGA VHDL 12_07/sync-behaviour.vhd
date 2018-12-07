@@ -5,10 +5,10 @@ use IEEE.numeric_std.ALL;
 architecture behaviour of sync is
 signal vold, vnew, hold, hnew : std_logic;
 begin
-	--buffers om glitches te voorkomen
-	process(clk, reset)
+	--
+	process(clk)
 	begin
-		if (rising_edge(clk)) then
+		if (clk'event AND clk ='1')then	
 			if (reset = '1') then
 				vold <= '0';
 				hold <= '0';
@@ -18,6 +18,9 @@ begin
 			end if;
 		end if;
 	end process;
+	-- new value for hsync depends on x counter
+	-- <400 so we do not get a glitch at the start, 
+	-- since x counter starts at max value after a reset
 	process(x)
 	begin
 		if (unsigned(x) > 47 AND unsigned(x) < 400) then
@@ -26,6 +29,7 @@ begin
 			hnew <= '0';
 		end if;
 	end process;
+	-- vsync depending on the y counter
 	process(y)
 	begin
 		if (unsigned(y) > 1) then
@@ -37,7 +41,9 @@ begin
 
 	v_sync <= vold;
 	h_sync <= hold;
-	enable_calc <= NOT vold;
+	enable_calc <= NOT vold; 
+	-- this signal is send to the other modules 
+	-- to tell them the frame has been drawn
 
 end behaviour;
 

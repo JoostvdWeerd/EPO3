@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.std_logic_1164.ALL;
 
+-- sync uses the x and y counter and outputs the sync signals
 entity sync is
    port(clk	 	    : in  std_logic;
 	x           : in  std_logic_vector(8 downto 0);
