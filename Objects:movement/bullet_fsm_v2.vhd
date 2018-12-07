@@ -63,7 +63,7 @@ ARCHITECTURE behaviour of bullet is
       when move =>
           x_pos_new <= x_pos + "000000001" ;
           y_pos_new <= y_pos; 
-          bullet_state <= '0';
+          bullet_state <= '1';
           if (collision = '1') then 
               new_state <= start;
           else 
