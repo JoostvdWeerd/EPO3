@@ -1,0 +1,247 @@
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+use ieee.numeric_std.all;
+
+architecture behaviour_collision of collision is
+type collision_state is (reset_state, not_colliding, colliding, next_object);
+	signal state, new_state : collision_state;
+type range_state is (range_reset_state, object_object, object_bullet, bullet_object);
+	signal range_state_out, range_new_state : range_state;
+signal inputvector_x : std_logic_vector(143 downto 0);
+signal inputvector_y : std_logic_vector(143 downto 0);
+signal new_col :	std_logic_vector(15 downto 0);
+--constant strt_9 :	std_logic_vector(3 downto 0) := "1001";			--9   start constants for counter 2
+--constant strt_5 :	std_logic_vector(3 downto 0) := "0101";			--5
+--constant strt_4 :	std_logic_vector(3 downto 0) := "0100";			--4
+--constant strt_0 :	std_logic_vector(3 downto 0) := "0000";			--0
+constant multiplyvalue : integer := 9;
+constant object_width : integer :=32;
+constant object_height : integer :=32;
+constant bullet_width : integer :=6;
+constant bullet_height  : integer :=6;
+constant upper_limit : integer:=40; --wall size at top of screen
+constant lower_limit: integer:=40; --wall size bottom of the screen
+--constant screen_height : integer := 479;
+constant actual_screen_height : integer:= 439; --screen_heigth minus the lower_limit (wall)
+constant screen_width : integer := 319;
+signal upper_x_range : std_logic_vector (8 downto 0);
+signal lower_x_range : std_logic_vector (8 downto 0);
+signal upper_y_range : std_logic_vector (8 downto 0);
+signal lower_y_range : std_logic_vector (8 downto 0);
+signal max_counter_value : integer range 4 to 15;
+begin
+inputvector_x <= x_15 & x_14 & x_13 & x_12 & x_11 & x_10 & x_9 & x_8 & x_7 & x_6 & x_5 & x_4 & x_3 & x_2 & x_1 & x_0;
+inputvector_y <= y_15 & y_14 & y_13 & y_12 & y_11 & y_10 & y_9 & y_8 & y_7 & y_6 & y_5 & y_4 & y_3 & y_2 & y_1 & y_0;
+state_process_rising_clk: process(clk, reset)
+begin
+	if (clk'event and clk = '1') then
+		if reset = '1' then
+			--state <= reset_state;
+			range_state_out <= range_reset_state;
+			col <= (others => '0');
+		else
+			--state <= new_state;
+			range_state_out <= range_new_state;
+			col <= new_col;
+		end if;
+	end if;
+end process;
+state_process_falling_clk: process(clk, reset)
+begin
+	if (clk'event and clk = '0') then
+		if reset = '1' then
+			state <= reset_state;
+			--range_state_out <= range_reset_state;
+			--col <= (others => '0');
+		else
+			state <= new_state;
+			--range_state_out <= range_new_state;
+			--col <= new_col;
+		end if;
+	end if;
+end process;
+
+collision_compare_process: process(state,inputvector_y, inputvector_x, c_1, c_2, upper_x_range, lower_x_range, upper_y_range, lower_y_range, main_enable)
+begin
+	case state is
+	 when reset_state =>
+		new_col <= col;
+		cnt_1_enable	<= '0';	--do not count
+		cnt_2_reset	<= '1'; --reset the counter
+		done <= '1' ; --system has processed all the incomming data
+		if (main_enable = '1') then
+	        		new_state <= not_colliding; --new coordinates are present
+		else
+			new_state <= reset_state; -- nothing new, just do nothing
+		end if;
+	 when not_colliding =>
+		new_col <= col; --don't change the output (output is automaticly/at the beginning zet to "alive"
+		cnt_1_enable	<= '0';	--do not count
+		cnt_2_reset	<= '0'; --count
+		done <= '0' ; --still processing
+	        if ((inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1))) <= std_logic_vector(to_unsigned(upper_limit,9))) --upper screen bound
+	   	     OR (inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1))) = "000000000") --left screen bound
+	   	     OR (inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1))) >= std_logic_vector(to_unsigned(screen_width,9))) --right screen bound
+	   	     OR (upper_y_range >= std_logic_vector(to_unsigned(actual_screen_height,9))) --lower screen bound
+	   	     OR (	(c_1 /= c_2)  -- there is a collision (the second object is within the range of the first object
+	  	     AND (inputvector_x (multiplyvalue*to_integer(unsigned(c_2)) + 8 downto multiplyvalue*to_integer(unsigned(c_2))) <= upper_x_range) 
+	  	     AND (inputvector_x (multiplyvalue*to_integer(unsigned(c_2)) + 8 downto multiplyvalue*to_integer(unsigned(c_2))) >= lower_x_range)
+	  	     AND (inputvector_y (multiplyvalue*to_integer(unsigned(c_2)) + 8 downto multiplyvalue*to_integer(unsigned(c_2))) <= upper_y_range)
+	  	     AND (inputvector_y (multiplyvalue*to_integer(unsigned(c_2)) + 8 downto multiplyvalue*to_integer(unsigned(c_2))) >= lower_y_range)	)) then
+          			new_state <= colliding;
+	  	elsif (to_integer(unsigned(c_2)) >= max_counter_value) then --object doesn't collide with anything
+	  		new_state <= next_object;
+	  	else
+	  		new_state <= not_colliding; --object doesn't collide with another object
+	 	end if;
+	  when colliding =>
+		new_col <= col;
+		new_col(to_integer(unsigned(c_1)))	<= '1';	--set bit to "dead"
+		cnt_1_enable	<= '1';	-- count
+		cnt_2_reset	<= '1'; -- reset the counter
+		done <= '0' ; --still processing
+		if (c_1 = "0000") then
+		new_state <= reset_state; --done with all calculations/ final object has been analyzed
+		else
+	  	new_state <= not_colliding;
+		end if;
+	 when next_object =>
+		new_col <= col;
+		new_col(to_integer(unsigned(c_1)))	<= '0';	--set bit to "alive"
+		cnt_1_enable	<= '1';	-- count
+		cnt_2_reset	<= '1'; --reset the counter	
+		done <= '0' ; --still processing
+	  	if (c_1 = "0000") then
+		new_state <= reset_state; --done with all calculations/ final object has been analyzed
+		else
+	  	new_state <= not_colliding;
+		end if;
+	end case;
+end process;
+
+start_end_value_determination: process(clk,c_1)
+begin
+case c_1 is --The start value is now one count of counter_one to early but counter_two reads the previous value so this way it works ar	start_value: out std_logic_vector (3 downto 0);
+  when "0000" =>  start_value <= "1001"; --9			0
+		  max_counter_value <= 15;
+  when "0001" =>  start_value <= "1001"; --9			1
+		  max_counter_value <= 15;
+  when "0010" =>  start_value <= "1001"; --9			2
+		  max_counter_value <= 15;		
+  when "0011" =>  start_value <= "1001"; --9			3
+		  max_counter_value <= 15;
+  when "0100" =>		start_value <= "0101"; --5	  4
+		  max_counter_value <= 15;
+  when "0101" =>  start_value <= "0100"; --4   5
+		  max_counter_value <= 4;
+  when "0110" =>  start_value <= "0100"; --4   6
+		  max_counter_value <= 4;
+  when "0111" =>  start_value <= "0100"; --4   7
+		  max_counter_value <= 4;
+  when "1000" =>  start_value <= "0100"; --4   8
+		  max_counter_value <= 4;
+  when others =>  start_value <= "0000"; --0   9 tm 15
+		  max_counter_value <= 4;
+end case;
+end process;
+
+collision_range_determination: process(c_1,c_2,range_state_out) -- can be made more efficient by looking at the if statement to see if there is unnecessary material in there. Thus material that will never occur.
+begin
+case range_state_out is
+	when range_reset_state =>
+		upper_x_range <= (others => '1');
+		lower_x_range <= (others => '0');
+		upper_y_range <= (others => '1');
+		lower_y_range <= (others => '0');
+		if(to_integer(unsigned(c_1))<4) then --player bullets are compared
+			range_new_state <= bullet_object;
+		elsif(to_integer(unsigned(c_1)) = 4) then -- player is compared to
+			if (to_integer(unsigned(c_2))	< 9) then -- enemy bullets
+				range_new_state <= object_bullet;
+			else
+				range_new_state <= object_object; --enemies
+			end if;
+		elsif(to_integer(unsigned(c_1))>4 AND to_integer(unsigned(c_1))<9) then --enemy bullets are compared
+			range_new_state <= bullet_object;
+		else --enemies are comparred with
+			if (to_integer(unsigned(c_2))=4) then --player
+				range_new_state <= object_object;
+			else -- player bullets
+				range_new_state <= object_bullet;
+			end if;
+		end if;
+	
+	when object_object =>
+		upper_x_range <= std_logic_vector(unsigned(inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) + object_width);
+		lower_x_range <= std_logic_vector(unsigned(inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) - object_width);
+		upper_y_range <= std_logic_vector(unsigned(inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) + object_height);
+		lower_y_range <= std_logic_vector(unsigned(inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) - object_height);
+
+		if(to_integer(unsigned(c_1))<4) then --player bullets are compared
+			range_new_state <= bullet_object;
+		elsif(to_integer(unsigned(c_1)) = 4) then -- player is compared to
+			if (to_integer(unsigned(c_2))	< 9) then -- enemy bullets
+				range_new_state <= object_bullet;
+			else
+				range_new_state <= object_object; --enemies
+			end if;
+		elsif(to_integer(unsigned(c_1))>4 AND to_integer(unsigned(c_1))<9) then --enemy bullets are compared
+			range_new_state <= bullet_object;
+		else --enemies are comparred with
+			if (to_integer(unsigned(c_2))=4) then --player
+				range_new_state <= object_object;
+			else -- player bullets
+				range_new_state <= object_bullet;
+			end if;
+		end if;
+
+	when object_bullet =>
+		upper_x_range <= std_logic_vector(unsigned(inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) + object_width);
+		lower_x_range <= std_logic_vector(unsigned(inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) - bullet_width);
+		upper_y_range <= std_logic_vector(unsigned(inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) + object_height);
+		lower_y_range <= std_logic_vector(unsigned(inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) - bullet_height);
+
+		if(to_integer(unsigned(c_1))<4) then --player bullets are compared
+			range_new_state <= bullet_object;
+		elsif(to_integer(unsigned(c_1)) = 4) then -- player is compared to
+			if (to_integer(unsigned(c_2))	< 9) then -- enemy bullets
+				range_new_state <= object_bullet;
+			else
+				range_new_state <= object_object; --enemies
+			end if;
+		elsif(to_integer(unsigned(c_1))>4 AND to_integer(unsigned(c_1))<9) then --enemy bullets are compared
+			range_new_state <= bullet_object;
+		else --enemies are comparred with
+			if (to_integer(unsigned(c_2))=4) then --player
+				range_new_state <= object_object;
+			else -- player bullets
+				range_new_state <= object_bullet;
+			end if;
+		end if;
+
+	when bullet_object =>
+		upper_x_range <= std_logic_vector(unsigned(inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) + bullet_width);
+		lower_x_range <= std_logic_vector(unsigned(inputvector_x (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) - object_width);
+		upper_y_range <= std_logic_vector(unsigned(inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) + bullet_height);
+		lower_y_range <= std_logic_vector(unsigned(inputvector_y (multiplyvalue*to_integer(unsigned(c_1)) + 8 downto multiplyvalue*to_integer(unsigned(c_1)))) - object_height);
+
+		if(to_integer(unsigned(c_1))<4) then --player bullets are compared
+			range_new_state <= bullet_object;
+		elsif(to_integer(unsigned(c_1)) = 4) then -- player is compared to
+			if (to_integer(unsigned(c_2))	< 9) then -- enemy bullets
+				range_new_state <= object_bullet;
+			else
+				range_new_state <= object_object; --enemies
+			end if;
+		elsif(to_integer(unsigned(c_1))>4 AND to_integer(unsigned(c_1))<9) then --enemy bullets are compared
+			range_new_state <= bullet_object;
+		else --enemies are comparred with
+			if (to_integer(unsigned(c_2))=4) then --player
+				range_new_state <= object_object;
+			else -- player bullets
+				range_new_state <= object_bullet;
+			end if;
+		end if;
+	end case;
+end process;
+end behaviour_collision;
