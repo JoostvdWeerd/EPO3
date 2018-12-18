@@ -1,0 +1,17 @@
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+
+entity gradius_top_level is
+port(	clk    : in  std_logic;
+        reset  : in  std_logic;
+        left   : in  std_logic;
+        right  : in  std_logic;
+        up     : in  std_logic;
+        down   : in  std_logic;
+        shoot  : in  std_logic;
+	r      : out  std_logic;
+	g      : out  std_logic;
+	b      : out  std_logic;
+	h_sync : out  std_logic;
+	v_sync : out  std_logic);
+end gradius_top_level;
