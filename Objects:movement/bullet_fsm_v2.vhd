@@ -18,6 +18,11 @@ ENTITY 	bullet is
 		);
 end bullet;
 
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+use IEEE.std_logic_unsigned.ALL;
+use IEEE.numeric_std.ALL;
+
 ARCHITECTURE behaviour of bullet is 
 
     type state_fsm_enemy is (start, placeinscreen, move);
@@ -83,8 +88,8 @@ ARCHITECTURE behaviour of bullet is
       
     end process;
     
-    x_position_bullet <= x_pos;
-    y_position_bullet <= y_pos;
+    x_bullet <= x_pos;
+    y_bullet <= y_pos;
     
 END ARCHITECTURE behaviour;
 
