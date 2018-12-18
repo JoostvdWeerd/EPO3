@@ -1,3 +1,66 @@
+entity test is 
+   port(clk           : in  std_logic;
+        reset         : in  std_logic;
+        frame_ready   : in  std_logic;
+        left          : in  std_logic;
+        right         : in  std_logic;
+        up            : in  std_logic;
+        down          : in  std_logic;
+        shoot         : in  std_logic;
+        enemy_1_y     : in  std_logic_vector(8 downto 0);
+        enemy_2_y     : in  std_logic_vector(8 downto 0);
+        enemy_3_y     : in  std_logic_vector(8 downto 0);
+        enemy_4_y     : in  std_logic_vector(8 downto 0);
+        enemy_5_y     : in  std_logic_vector(8 downto 0);
+        enemy_6_y     : in  std_logic_vector(8 downto 0);
+        e_respawn_1   : in  std_logic;
+        e_respawn_2   : in  std_logic;
+        e_respawn_3   : in  std_logic;
+        e_respawn_4   : in  std_logic;
+        e_respawn_5   : in  std_logic;
+        e_respawn_6   : in  std_logic;
+        coll_enemy_1  : in  std_logic;
+        coll_enemy_2  : in  std_logic;
+        coll_enemy_3  : in  std_logic;
+        coll_enemy_4  : in  std_logic;
+        coll_enemy_5  : in  std_logic;
+        coll_enemy_6  : in  std_logic;
+        coll_bullet_1 : in  std_logic;
+        coll_bullet_2 : in  std_logic;
+        coll_bullet_3 : in  std_logic;
+        coll_player   : in  std_logic;
+        player_x      : out std_logic_vector(8 downto 0);
+        player_y      : out std_logic_vector(8 downto 0);
+        enemy_x_1     : out std_logic_vector(8 downto 0);
+        enemy_y_1     : out std_logic_vector(8 downto 0);
+        enemy_x_2     : out std_logic_vector(8 downto 0);
+        enemy_y_2     : out std_logic_vector(8 downto 0);
+        enemy_x_3     : out std_logic_vector(8 downto 0);
+        enemy_y_3     : out std_logic_vector(8 downto 0);
+        enemy_x_4     : out std_logic_vector(8 downto 0);
+        enemy_y_4     : out std_logic_vector(8 downto 0);
+        enemy_x_5     : out std_logic_vector(8 downto 0);
+        enemy_y_5     : out std_logic_vector(8 downto 0);
+        enemy_x_6     : out std_logic_vector(8 downto 0);
+        enemy_y_6     : out std_logic_vector(8 downto 0);
+        bullet_x_1    : out std_logic_vector(8 downto 0);
+        bullet_y_1    : out std_logic_vector(8 downto 0);
+        bullet_x_2    : out std_logic_vector(8 downto 0);
+        bullet_y_2    : out std_logic_vector(8 downto 0);
+        bullet_x_3    : out std_logic_vector(8 downto 0);
+        bullet_y_3    : out std_logic_vector(8 downto 0);
+        enemy_alive_1 : out std_logic;
+        enemy_alive_2 : out std_logic;
+        enemy_alive_3 : out std_logic;
+        enemy_alive_4 : out std_logic;
+        enemy_alive_5 : out std_logic;
+        enemy_alive_6 : out std_logic);
+end test;
+
+
+
+
+
 library IEEE;
 use IEEE.std_logic_1164.ALL;
 
