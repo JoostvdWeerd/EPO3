@@ -1,0 +1,349 @@
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+
+architecture behaviour of gradius_top_level is
+
+component display 	--VGA
+port(clk : in std_logic;
+reset: in std_logic;
+game: in std_logic_vector (1 downto 0);
+r: out std_logic;
+g: out std_logic;
+b: out std_logic;
+hsync: out std_logic;
+vsync: out std_logic;
+enable_calc : out std_logic;
+x_player : in std_logic_vector(8 downto 0);
+y_player : in std_logic_vector(8 downto 0);
+x_bullet1 : in std_logic_vector(8 downto 0);
+y_bullet1 : in std_logic_vector(8 downto 0);
+x_bullet2 : in std_logic_vector(8 downto 0);
+y_bullet2 : in std_logic_vector(8 downto 0);
+x_bullet3 : in std_logic_vector(8 downto 0);
+y_bullet3 : in std_logic_vector(8 downto 0);
+x_enemy1 : in std_logic_vector(8 downto 0);
+y_enemy1 : in std_logic_vector(8 downto 0);
+x_enemy2 : in std_logic_vector(8 downto 0);
+y_enemy2 : in std_logic_vector(8 downto 0);
+x_enemy3 : in std_logic_vector(8 downto 0);
+y_enemy3 : in std_logic_vector(8 downto 0);
+x_enemy4 : in std_logic_vector(8 downto 0);
+y_enemy4 : in std_logic_vector(8 downto 0);
+x_enemy5 : in std_logic_vector(8 downto 0);
+y_enemy5 : in std_logic_vector(8 downto 0);
+x_enemy6 : in std_logic_vector(8 downto 0);
+y_enemy6 : in std_logic_vector(8 downto 0));
+end component;
+
+
+component top_level  --Collision
+  port( clk, reset : in std_logic;
+	y_0   : in  std_logic_vector(8 downto 0);
+        y_1   : in  std_logic_vector(8 downto 0);
+        y_2   : in  std_logic_vector(8 downto 0);
+        y_3   : in  std_logic_vector(8 downto 0);
+        y_4   : in  std_logic_vector(8 downto 0);
+        y_5   : in  std_logic_vector(8 downto 0);
+        y_6   : in  std_logic_vector(8 downto 0);
+        y_7   : in  std_logic_vector(8 downto 0);
+        y_8   : in  std_logic_vector(8 downto 0);
+        y_9   : in  std_logic_vector(8 downto 0);
+        y_10  : in  std_logic_vector(8 downto 0);
+        y_11  : in  std_logic_vector(8 downto 0);
+        y_12  : in  std_logic_vector(8 downto 0);
+        y_13  : in  std_logic_vector(8 downto 0);
+        y_14  : in  std_logic_vector(8 downto 0);
+        y_15  : in  std_logic_vector(8 downto 0);
+        x_0   : in  std_logic_vector(8 downto 0);
+        x_1   : in  std_logic_vector(8 downto 0);
+        x_2   : in  std_logic_vector(8 downto 0);
+        x_3   : in  std_logic_vector(8 downto 0);
+        x_4   : in  std_logic_vector(8 downto 0);
+        x_5   : in  std_logic_vector(8 downto 0);
+        x_6   : in  std_logic_vector(8 downto 0);
+        x_7   : in  std_logic_vector(8 downto 0);
+        x_8   : in  std_logic_vector(8 downto 0);
+        x_9   : in  std_logic_vector(8 downto 0);
+        x_10  : in  std_logic_vector(8 downto 0);
+        x_11  : in  std_logic_vector(8 downto 0);
+        x_12  : in  std_logic_vector(8 downto 0);
+        x_13  : in  std_logic_vector(8 downto 0);
+        x_14  : in  std_logic_vector(8 downto 0);
+        x_15  : in  std_logic_vector(8 downto 0);
+	main_enable: in  std_logic;
+	done  : out std_logic;
+	col   : out std_logic_vector(15 downto 0)
+	);
+end component;
+
+
+component toplevel_spawn 		--enemy spawning
+   port(clk         : in  std_logic;
+        reset       : in  std_logic;
+        enable      : in  std_logic;
+        enemy_1     : in  std_logic;
+        enemy_2     : in  std_logic;
+        enemy_3     : in  std_logic;
+        enemy_4     : in  std_logic;
+        enemy_5     : in  std_logic;
+        enemy_6     : in  std_logic;
+        enemy_o_y_1 : out std_logic_vector(8 downto 0);
+        enemy_o_y_2 : out std_logic_vector(8 downto 0);
+        enemy_o_y_3 : out std_logic_vector(8 downto 0);
+        enemy_o_y_4 : out std_logic_vector(8 downto 0);
+        enemy_o_y_5 : out std_logic_vector(8 downto 0);
+        enemy_o_y_6 : out std_logic_vector(8 downto 0);
+        enemy_o_l_1 : out std_logic;
+        enemy_o_l_2 : out std_logic;
+        enemy_o_l_3 : out std_logic;
+        enemy_o_l_4 : out std_logic;
+        enemy_o_l_5 : out std_logic;
+        enemy_o_l_6 : out std_logic);
+end component;
+
+
+component state_gradius  --gaming state
+   port(clk    : in  std_logic;
+        reset  : in  std_logic;
+        left   : in  std_logic;
+        right  : in  std_logic;
+        up     : in  std_logic;
+        down   : in  std_logic;
+        shoot  : in  std_logic;
+	collision_player : in std_logic;
+        game_state_info_signal: out std_logic_vector(1 downto 0));
+end component;
+
+component movement --movement module
+   port(clk           : in  std_logic;
+        reset         : in  std_logic;
+        frame_ready   : in  std_logic;
+        left          : in  std_logic;
+        right         : in  std_logic;
+        up            : in  std_logic;
+        down          : in  std_logic;
+        shoot         : in  std_logic;
+        enemy_1_y     : in  std_logic_vector(8 downto 0);
+        enemy_2_y     : in  std_logic_vector(8 downto 0);
+        enemy_3_y     : in  std_logic_vector(8 downto 0);
+        enemy_4_y     : in  std_logic_vector(8 downto 0);
+        enemy_5_y     : in  std_logic_vector(8 downto 0);
+        enemy_6_y     : in  std_logic_vector(8 downto 0);
+        e_respawn_1   : in  std_logic;
+        e_respawn_2   : in  std_logic;
+        e_respawn_3   : in  std_logic;
+        e_respawn_4   : in  std_logic;
+        e_respawn_5   : in  std_logic;
+        e_respawn_6   : in  std_logic;
+        coll_enemy_1  : in  std_logic;
+        coll_enemy_2  : in  std_logic;
+        coll_enemy_3  : in  std_logic;
+        coll_enemy_4  : in  std_logic;
+        coll_enemy_5  : in  std_logic;
+        coll_enemy_6  : in  std_logic;
+        coll_bullet_1 : in  std_logic;
+        coll_bullet_2 : in  std_logic;
+        coll_bullet_3 : in  std_logic;
+        coll_player   : in  std_logic;
+        player_x      : out std_logic_vector(8 downto 0);
+        player_y      : out std_logic_vector(8 downto 0);
+        enemy_x_1     : out std_logic_vector(8 downto 0);
+        enemy_y_1     : out std_logic_vector(8 downto 0);
+        enemy_x_2     : out std_logic_vector(8 downto 0);
+        enemy_y_2     : out std_logic_vector(8 downto 0);
+        enemy_x_3     : out std_logic_vector(8 downto 0);
+        enemy_y_3     : out std_logic_vector(8 downto 0);
+        enemy_x_4     : out std_logic_vector(8 downto 0);
+        enemy_y_4     : out std_logic_vector(8 downto 0);
+        enemy_x_5     : out std_logic_vector(8 downto 0);
+        enemy_y_5     : out std_logic_vector(8 downto 0);
+        enemy_x_6     : out std_logic_vector(8 downto 0);
+        enemy_y_6     : out std_logic_vector(8 downto 0);
+        bullet_x_1    : out std_logic_vector(8 downto 0);
+        bullet_y_1    : out std_logic_vector(8 downto 0);
+        bullet_x_2    : out std_logic_vector(8 downto 0);
+        bullet_y_2    : out std_logic_vector(8 downto 0);
+        bullet_x_3    : out std_logic_vector(8 downto 0);
+        bullet_y_3    : out std_logic_vector(8 downto 0);
+        enemy_alive_1 : out std_logic;
+        enemy_alive_2 : out std_logic;
+        enemy_alive_3 : out std_logic;
+        enemy_alive_4 : out std_logic;
+        enemy_alive_5 : out std_logic;
+        enemy_alive_6 : out std_logic);
+end component;
+
+-- SIGNAL DECLARATION
+signal calculation_time_enable, collision_done: std_logic;
+signal x_pos_p,y_pos_p,x_pos_e1,y_pos_e1,x_pos_e2,y_pos_e2,x_pos_e3,y_pos_e3,x_pos_e4,y_pos_e4,x_pos_e5,y_pos_e5,x_pos_e6,y_pos_e6,x_pos_b1,y_pos_b1,x_pos_b2,y_pos_b2,x_pos_b3,y_pos_b3: std_logic_vector (8 downto 0);
+signal y_e_spawn_1,y_e_spawn_2,y_e_spawn_3,y_e_spawn_4,y_e_spawn_5,y_e_spawn_6: std_logic_vector (8 downto 0); -- y-coordinates from enemy spawn
+signal spawn_or_not_e1, spawn_or_not_e2, spawn_or_not_e3, spawn_or_not_e4, spawn_or_not_e5, spawn_or_not_e6 : std_logic; --from enemy spawn
+constant zero_coordinates : std_logic_vector (8 downto 0) := "000000000";
+signal collision_output_vector : std_logic_vector (15 downto 0);
+signal game_state_info_signal_s : std_logic_vector (1 downto 0);
+signal e_1, e_2, e_3, e_4, e_5, e_6 : std_logic;
+
+-- PORT MAP
+begin
+VGA : display port map(
+	clk => clk,
+	reset => reset,
+	game => game_state_info_signal_s,
+	r => r,
+	g => g,
+	b => b,
+	hsync => h_sync,
+	vsync => v_sync,
+	enable_calc => calculation_time_enable,
+	x_player => x_pos_p,
+	y_player => y_pos_p,
+	x_bullet1 => x_pos_b1,
+	y_bullet1 => y_pos_b1,
+	x_bullet2 => x_pos_b2,
+	y_bullet2 => y_pos_b2,
+	x_bullet3 => x_pos_b3,
+	y_bullet3 => y_pos_b3,
+	x_enemy1 => x_pos_e1,
+	y_enemy1 => y_pos_e1,
+	x_enemy2 => x_pos_e2,
+	y_enemy2 => y_pos_e2,
+	x_enemy3 => x_pos_e3,
+	y_enemy3 => y_pos_e3,
+	x_enemy4 => x_pos_e4,
+	y_enemy4 => y_pos_e4,
+	x_enemy5 => x_pos_e5,
+	y_enemy5 => y_pos_e5,
+	x_enemy6 => x_pos_e6,
+	y_enemy6 => y_pos_e6);
+
+Collision : top_level  port map (
+	clk => clk,
+	reset => reset,
+	y_0   => y_pos_b1,
+        y_1   => y_pos_b2,
+        y_2   => y_pos_b3,
+        y_3   => zero_coordinates,
+        y_4   => y_pos_p,
+        y_5   => zero_coordinates,
+        y_6   => zero_coordinates,
+        y_7   => zero_coordinates,
+        y_8   => zero_coordinates,
+        y_9   => y_pos_e1,
+        y_10  => y_pos_e2,
+        y_11  => y_pos_e3,
+        y_12  => y_pos_e4,
+        y_13  => y_pos_e5,
+        y_14  => y_pos_e6,
+        y_15  => zero_coordinates,
+        x_0   => x_pos_b1,
+        x_1   => x_pos_b2,
+        x_2   => x_pos_b3,
+        x_3   => zero_coordinates,
+        x_4   => x_pos_p,
+        x_5   => zero_coordinates,
+        x_6   => zero_coordinates,
+        x_7   => zero_coordinates,
+        x_8   => zero_coordinates,
+        x_9   => x_pos_e1,
+        x_10  => x_pos_e2,
+        x_11  => x_pos_e3,
+        x_12  => x_pos_e4,
+        x_13  => x_pos_e5,
+        x_14  => x_pos_e6,
+        x_15  => zero_coordinates,
+	main_enable => calculation_time_enable,
+	done => collision_done,
+	col  => collision_output_vector);
+
+Enemy_spawning : toplevel_spawn port map (
+	clk      => clk,
+        reset    => reset,
+        enable   => calculation_time_enable,
+        enemy_1  => e_1,
+        enemy_2  => e_2,
+        enemy_3  => e_3,
+        enemy_4  => e_4,
+        enemy_5  => e_5,
+        enemy_6  => e_6,
+        enemy_o_y_1 => y_e_spawn_1,
+        enemy_o_y_2 => y_e_spawn_2,
+        enemy_o_y_3 => y_e_spawn_3,
+        enemy_o_y_4 => y_e_spawn_4,
+        enemy_o_y_5 => y_e_spawn_5,
+        enemy_o_y_6 => y_e_spawn_6,
+        enemy_o_l_1 => spawn_or_not_e1,
+        enemy_o_l_2 => spawn_or_not_e2,
+        enemy_o_l_3 => spawn_or_not_e3,
+        enemy_o_l_4 => spawn_or_not_e4,
+        enemy_o_l_5 => spawn_or_not_e5,
+        enemy_o_l_6 => spawn_or_not_e6);
+
+Gaming_state :  state_gradius port map (
+	clk    => clk,
+        reset  => reset,
+        left   => left,
+        right  => right,
+        up     => up,
+        down   => down,
+        shoot  => shoot,
+	collision_player => collision_output_vector(4),
+        game_state_info_signal => game_state_info_signal_s);
+
+Movement_module : movement port map(
+	clk           => clk,
+        reset         => reset,
+        frame_ready   => calculation_time_enable,
+        left          => left,
+        right         => right,
+        up            => up,
+        down          => down,
+        shoot         => shoot,
+        enemy_1_y     => y_e_spawn_1,
+        enemy_2_y     => y_e_spawn_2,
+        enemy_3_y     => y_e_spawn_3,
+        enemy_4_y     => y_e_spawn_4,
+        enemy_5_y     => y_e_spawn_5,
+        enemy_6_y     => y_e_spawn_6,
+        e_respawn_1   => spawn_or_not_e1,
+        e_respawn_2   => spawn_or_not_e2,
+        e_respawn_3   => spawn_or_not_e3,
+        e_respawn_4   => spawn_or_not_e4,
+        e_respawn_5   => spawn_or_not_e5,
+        e_respawn_6   => spawn_or_not_e6,
+        coll_enemy_1  => collision_output_vector(9),
+        coll_enemy_2  => collision_output_vector(10),
+        coll_enemy_3  => collision_output_vector(11),
+        coll_enemy_4  => collision_output_vector(12),
+        coll_enemy_5  => collision_output_vector(13),
+        coll_enemy_6  => collision_output_vector(14),
+        coll_bullet_1 => collision_output_vector(0),
+        coll_bullet_2 => collision_output_vector(1),
+        coll_bullet_3 => collision_output_vector(2),
+        coll_player   => collision_output_vector(4),
+        player_x      => x_pos_p,
+        player_y      => y_pos_p,
+        enemy_x_1    => x_pos_e1,
+        enemy_y_1    => y_pos_e1,
+        enemy_x_2    => x_pos_e2,
+        enemy_y_2    => y_pos_e2,
+        enemy_x_3    => x_pos_e3,
+        enemy_y_3    => y_pos_e3,
+        enemy_x_4    => x_pos_e4,
+        enemy_y_4    => y_pos_e4,
+        enemy_x_5    => x_pos_e5,
+        enemy_y_5    => y_pos_e5,
+        enemy_x_6    => x_pos_e6,
+        enemy_y_6    => y_pos_e6,
+        bullet_x_1   => x_pos_b1,
+        bullet_y_1   => y_pos_b1,
+        bullet_x_2   => x_pos_b2,
+        bullet_y_2   => y_pos_b2,
+        bullet_x_3   => x_pos_b3,
+        bullet_y_3   => y_pos_b3,
+        enemy_alive_1 => e_1,
+        enemy_alive_2 => e_2,
+        enemy_alive_3 => e_3,
+        enemy_alive_4 => e_4,
+        enemy_alive_5 => e_5,
+        enemy_alive_6 => e_6);
+end behaviour;
