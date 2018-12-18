@@ -1,0 +1,102 @@
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+
+entity objandmove is
+   port(clk        : in  std_logic;
+        reset      : in  std_logic;
+        frame_ready		   : in  std_logic;
+        x_control  : in  std_logic_vector(1 downto 0);
+        y_control  : in  std_logic_vector(1 downto 0);
+        shoot      : in  std_logic;
+        spawn      : in  std_logic;
+        collision  : in  std_logic;
+        spawn1_x   : in  std_logic_vector(8 downto 0);
+        spawn1_y   : in  std_logic_vector(8 downto 0);
+	spawn2_x   : in  std_logic_vector(8 downto 0);
+        spawn2_y   : in  std_logic_vector(8 downto 0);
+	spawn3_x   : in  std_logic_vector(8 downto 0);
+        spawn3_y   : in  std_logic_vector(8 downto 0);
+        x_position   : out std_logic_vector(8 downto 0);
+        y_position   : out std_logic_vector(8 downto 0);
+        bullet_xposition1  : out std_logic_vector(8 downto 0);
+        bullet_yposition1  : out std_logic_vector(8 downto 0);
+        bullet_xposition2  : out std_logic_vector(8 downto 0);
+        bullet_yposition2  : out std_logic_vector(8 downto 0);
+        bullet_xposition3  : out std_logic_vector(8 downto 0);
+        bullet_yposition3  : out std_logic_vector(8 downto 0);
+        enemy_xposition   : out std_logic_vector(8 downto 0);
+        enemy_yposition   : out std_logic_vector(8 downto 0);
+        alive      : out std_logic);
+end objandmove;
+
+architecture structural of objandmove is
+
+
+	component player
+		port(	clk         : in  std_logic;
+			reset	    : in 	std_logic;
+        			frame_ready : in  std_logic;
+        			x_control   : in  std_logic_vector(1 downto 0);
+        			y_control   : in  std_logic_vector(1 downto 0);
+        			x_position  : out std_logic_vector(8 downto 0);
+        			y_position  : out std_logic_vector(8 downto 0)
+		);
+	end component;
+
+	component enemy 
+		port(	clk         : in  std_logic;
+		        reset       : in  std_logic;
+		        spawn       : in  std_logic;
+		        collision   : in  std_logic;
+		        x_spawn_pos : in  std_logic_vector(8 downto 0);
+		        y_spawn_pos : in  std_logic_vector(8 downto 0);
+		        alive       : out std_logic;
+		        enemy_xposition  : out std_logic_vector(8 downto 0);
+		        enemy_yposition  : out std_logic_vector(8 downto 0)
+		);
+	end component;
+
+	component bullet
+		 port(	clk          : in  std_logic;
+		        reset        : in  std_logic;
+		        shoot        : in  std_logic;
+		        collision    : in  std_logic;
+		        frame_ready  : in  std_logic;
+		        x_position   : in  std_logic_vector(8 downto 0);
+		        y_position   : in  std_logic_vector(8 downto 0);
+		        bullet_state : out std_logic;
+		        x_bullet     : out std_logic_vector(8 downto 0);
+		        y_bullet     : out std_logic_vector(8 downto 0)
+		);
+	end component;
+		
+	component control_bullet
+		port(	clk			: in std_logic;
+			reset			: in std_logic;
+			shoot         			: in  std_logic;
+			bullet_inscreen_1			: in  std_logic;
+			bullet_inscreen_2			: in std_logic;
+			bullet_inscreen_3			: in std_logic;
+		        shootb1       : out std_logic;
+        			shootb2       : out std_logic;
+        			shootb3       : out std_logic
+		);
+	end component;
+
+	signal	player_xposition_bullet1, player_xposition_bullet2, player_xposition_bullet3	: std_logic_vector(8 downto 0);
+	signal	player_yposition_bullet1, player_yposition_bullet2, player_yposition_bullet3 : std_logic_vector(8 downto 0);
+	
+	signal 	bullet_state1, bullet_state2, bullet_state3					: std_logic;
+	signal 	shoot_bullet1, shoot_bullet2, shoot_bullet3					: std_logic;
+
+begin
+	player_movement :	player port map	(clk, reset, frame_ready, x_control, y_control, x_position, y_position);
+	enemy_movement1		: enemy 	port map	(clk, reset, spawn, collision, spawn1_x, spawn1_y, alive, enemy_xposition, enemy_yposition);
+	enemy_movement2		: enemy 	port map	(clk, reset, spawn, collision, spawn2_x, spawn2_y, alive, enemy_xposition, enemy_yposition);
+	enemy_movement3		: enemy 	port map	(clk, reset, spawn, collision, spawn3_x, spawn3_y, alive, enemy_xposition, enemy_yposition);
+	bullet1		: bullet 			port map	(clk, reset, shoot_bullet1, collision, frame_ready, player_xposition_bullet1, player_yposition_bullet1, bullet_state1, bullet_xposition1, bullet_yposition1);
+	bullet2		: bullet 			port map	(clk, reset, shoot_bullet2, collision, frame_ready, player_xposition_bullet2, player_yposition_bullet2, bullet_state2, bullet_xposition2, bullet_yposition2);
+	bullet3		: bullet 			port map	(clk, reset, shoot_bullet3, collision, frame_ready, player_xposition_bullet3, player_yposition_bullet3, bullet_state3, bullet_xposition3, bullet_yposition3);
+	bullet_controller : control_bullet 					port map (clk, reset, shoot, bullet_state1, bullet_state2, bullet_state3, shoot_bullet1, shoot_bullet2, shoot_bullet3);
+
+end structural;
