@@ -47,7 +47,7 @@ ARCHITECTURE behaviour of enemy is
       when move =>
           x_pos_new <= x_pos - "000000001" ;
           y_pos_new <= y_pos; 
-          alive <= '0';
+          alive <= '1';
           if (collision = '1') then 
               new_state <= start;
           else 
@@ -71,4 +71,3 @@ ARCHITECTURE behaviour of enemy is
     y_position <= y_pos;
     
 END ARCHITECTURE behaviour;
-
