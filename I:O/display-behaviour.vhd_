@@ -1,0 +1,113 @@
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+
+architecture behaviour of display is
+
+component x_counter is
+   port(clk : in  std_logic;
+        x   : out std_logic_vector(8 downto 0);
+	reset : in std_logic);
+end component;
+
+component y_counter is
+   port(clk	  : in  std_logic;
+	x     : in  std_logic_vector(8 downto 0);
+        reset : in  std_logic;
+        y     : out std_logic_vector(9 downto 0));
+end component;
+
+component sync is
+   port(clk         : in  std_logic;
+	x           : in  std_logic_vector(8 downto 0);
+        y           : in  std_logic_vector(9 downto 0);
+	reset 	    : in std_logic;
+        h_sync      : out std_logic;
+        v_sync      : out std_logic;
+        enable_calc : out std_logic);
+end component;
+
+component draw_counter is
+   port(clk        : in  std_logic;
+        reset      : in  std_logic;
+	enable     : in std_logic;
+        draw_count : out std_logic_vector(4 downto 0));
+end component;
+
+component bullet is
+   port(x_bul      : in  std_logic_vector(8 downto 0);
+        y_bul      : in  std_logic_vector(8 downto 0);
+        x          : in  std_logic_vector(8 downto 0);
+        y          : in  std_logic_vector(9 downto 0);
+	draw_count : in  std_logic_vector(4 downto 0);
+        R          : out std_logic;
+	G          : out std_logic;
+	B          : out std_logic;
+	enable     : out std_logic);
+end component;
+component player is
+   port(x_pl       : in  std_logic_vector(8 downto 0);
+        y_pl       : in  std_logic_vector(8 downto 0);
+        x          : in  std_logic_vector(8 downto 0);
+        y          : in  std_logic_vector(9 downto 0);
+        draw_count : in  std_logic_vector(4 downto 0);
+        R          : out std_logic;
+        G          : out std_logic;
+        B          : out std_logic;
+        enable     : out std_logic);
+end component;
+
+
+
+-- then we declare the signals used
+signal x : std_logic_vector(8 downto 0);
+signal y : std_logic_vector(9 downto 0);
+signal enable1, enable2, enable3, enable4 : std_logic;
+signal draw_count1, draw_count2, draw_count3, draw_count4 : std_logic_vector(4 downto 0);
+signal r1, r2, r3, r4, g1, g2, g3, g4, b1, b2, b3, b4 : std_logic;
+
+
+begin
+-- and now we port map everyting, nothing weird going on here.
+l01: x_counter port map (clk => clk, reset => reset, x => x);
+
+l02: y_counter port map (clk => clk, reset => reset, x => x, y => y);
+
+
+l03: sync port map (clk => clk, x => x, y => y, reset => reset, 
+		     h_sync => hsync, v_sync => vsync, 
+		     enable_calc => enable_calc);
+
+l041: draw_counter port map (clk => clk, reset => reset, enable => enable1, 
+			    draw_count => draw_count1);
+
+l042: draw_counter port map (clk => clk, reset => reset, enable => enable2, 
+			    draw_count => draw_count2);
+
+l043: draw_counter port map (clk => clk, reset => reset, enable => enable3, 
+			    draw_count => draw_count3);
+
+l044: draw_counter port map (clk => clk, reset => reset, enable => enable4, 
+			    draw_count => draw_count4);
+
+
+l051: bullet port map (x_bul => x_bullet1, y_bul => y_bullet1, x => x,
+		      y => y, draw_count => draw_count1, R => r1,
+		      G => g1, B => b1, enable => enable1);
+
+l052: bullet port map (x_bul => x_bullet2, y_bul => y_bullet2, x => x,
+		      y => y, draw_count => draw_count2, R => r2,
+		      G => g2, B => b2, enable => enable2);
+
+l053: bullet port map (x_bul => x_bullet3, y_bul => y_bullet3, x => x,
+		      y => y, draw_count => draw_count3, R => r3,
+		      G => g3, B => b3, enable => enable3);
+
+l06: player port map (x_pl => x_player, y_pl => y_player, x => x, y =>y,
+		      draw_count => draw_count4, R => r4, G => g4,
+		      B => b4, enable => enable4);
+
+r <= (r1 or r2 or r3 or r4);
+g <= (g1 or g2 or g3 or g4);
+b <= (b1 or b2 or b3 or b4);
+
+end behaviour;
