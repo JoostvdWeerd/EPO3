@@ -5,8 +5,10 @@ use IEEE.numeric_std.ALL;
 
 ENTITY player is
   
-  port  (   x_control   : in  std_logic_vector(1 downto 0);
-            y_control   : in  std_logic_vector(1 downto 0);
+  port  (   up		: in  std_logic;
+            down	: in  std_logic;
+		left	: in std_logic;
+		right	: in std_logic;
             --  case    : in  std_logic_vector(? downto 0); voor evt levens etc
             clk         : in  std_logic;
             reset       : in  std_logic;
@@ -41,16 +43,16 @@ begin
     end if;
   end process;
   
-  process(state_x, x_control, frame_ready)
+  process(frame_ready)
   begin
 	
 
     case state_x is
     when start_x =>
       x_pos_new <= "000111111";
-      if (x_control = "01") then
+      if (right = '1' and left = '0') then
         new_state_x <= move_right;
-      elsif ( x_control = "10") then
+      elsif (right = '0' and left = '1') then
         new_state_x <= move_left;
       else 
         new_state_x <= still_x;
@@ -60,9 +62,9 @@ begin
 	
       x_pos_new <= x_pos + "00000001";
 	
-      if (x_control = "01") then
+      if (right = '1' and left = '0') then
         new_state_x <= move_right;
-      elsif ( x_control = "10") then
+      elsif ( right = '0' and left = '1') then
         new_state_x <= move_left;
       else 
         new_state_x <= still_x;
@@ -72,9 +74,9 @@ begin
 	
       x_pos_new <= x_pos - "00000001";
 	
-      if (x_control = "01") then
+      if (right = '1' and left = '0') then
         new_state_x <= move_right;
-      elsif ( x_control = "10") then
+      elsif ( right = '0' and left = '1') then
         new_state_x <= move_left;
       else 
         new_state_x <= still_x;
@@ -82,9 +84,9 @@ begin
       
     when still_x =>
       x_pos_new <= x_pos;
-      if (x_control = "01") then
+      if (right = '1' and left = '0') then
         new_state_x <= move_right;
-      elsif ( x_control = "10") then
+      elsif ( right = '0' and left = '1') then
         new_state_x <= move_left;
       else 
         new_state_x <= still_x;
@@ -97,15 +99,15 @@ begin
     end case;
   end process;
   
-  process(state_y, y_control, frame_ready)
+  process(frame_ready)
   begin
 	
     case state_y is
     when start_y => 
       y_pos_new <= "001111111";
-      if (y_control = "01") then
+      if (up = '1' and down = '0') then
         new_state_y <= move_up;
-      elsif ( y_control = "10") then
+      elsif ( up = '0' and down = '1') then
         new_state_y <= move_down;
       else 
         new_state_y <= still_y;
@@ -115,9 +117,9 @@ begin
 	
       y_pos_new <= y_pos + "00000001";
 	
-      if (y_control = "01") then
+      if (up = '1' and down = '0') then
         new_state_y <= move_up;
-      elsif ( y_control = "10") then
+      elsif ( up = '0' and down = '1') then
         new_state_y <= move_down;
       else 
         new_state_y <= still_y;
@@ -127,9 +129,9 @@ begin
 	
       y_pos_new <= y_pos - "00000001";
 	
-      if (y_control = "01") then
+      if (up = '1' and down = '0') then
         new_state_y <= move_up;
-      elsif ( y_control = "10") then
+      elsif ( up = '0' and down = '1') then
         new_state_y <= move_down;
       else 
         new_state_y <= still_y;
@@ -137,9 +139,9 @@ begin
       
     when still_y => 
       y_pos_new <= y_pos;
-      if (y_control = "01") then
+      if (up = '1' and down = '0') then
         new_state_y <= move_up;
-      elsif ( y_control = "10") then
+      elsif ( up = '0' and down = '1') then
         new_state_y <= move_down;
       else 
         new_state_y <= still_y;
