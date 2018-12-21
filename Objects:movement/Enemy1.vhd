@@ -6,7 +6,7 @@ use IEEE.numeric_std.ALL;
 ENTITY enemy_one is 
     port  (   clk                   : in std_logic; 
               reset                 : in std_logic;
-              x_spawn_pos           : in std_logic_vector(8 downto 0);
+              frame_ready		: in std_logic;
               y_spawn_pos           : in std_logic_vector(8 downto 0);
               spawn                 : in std_logic;
               collision             : in std_logic;
@@ -39,7 +39,7 @@ ARCHITECTURE fsm_enemy_one of enemy_one is
         end if; 
     end process;
   
-    process (state, collision, spawn,x_pos,y_pos,x_spawn_pos,y_spawn_pos)   
+    process (frame_ready)   
     begin
       case state is 
       when start =>
@@ -53,7 +53,7 @@ ARCHITECTURE fsm_enemy_one of enemy_one is
           end if;
           
       when placeinscreen =>
-          x_pos_new <= x_spawn_pos;
+          x_pos_new <= "111111100";
           y_pos_new <= y_spawn_pos; 
           alive <= '1';
           new_state <= move;
@@ -61,7 +61,7 @@ ARCHITECTURE fsm_enemy_one of enemy_one is
       when move =>
           x_pos_new <= x_pos - "000000001" ;
           y_pos_new <= y_pos; 
-          alive <= '0';
+          alive <= '1';
           if (collision = '1') then 
               new_state <= start;
           else 
@@ -85,4 +85,3 @@ ARCHITECTURE fsm_enemy_one of enemy_one is
     y_position <= y_pos;
     
 END ARCHITECTURE fsm_enemy_one;
-
