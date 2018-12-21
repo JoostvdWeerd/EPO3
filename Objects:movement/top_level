@@ -1,24 +1,21 @@
-entity test is 
-   port(clk           : in  std_logic;
-        reset         : in  std_logic;
-        frame_ready   : in  std_logic;
-        left          : in  std_logic;
-        right         : in  std_logic;
-        up            : in  std_logic;
-        down          : in  std_logic;
-        shoot         : in  std_logic;
-        enemy_1_y     : in  std_logic_vector(8 downto 0);
-        enemy_2_y     : in  std_logic_vector(8 downto 0);
-        enemy_3_y     : in  std_logic_vector(8 downto 0);
-        enemy_4_y     : in  std_logic_vector(8 downto 0);
-        enemy_5_y     : in  std_logic_vector(8 downto 0);
-        enemy_6_y     : in  std_logic_vector(8 downto 0);
-        e_respawn_1   : in  std_logic;
-        e_respawn_2   : in  std_logic;
-        e_respawn_3   : in  std_logic;
-        e_respawn_4   : in  std_logic;
-        e_respawn_5   : in  std_logic;
-        e_respawn_6   : in  std_logic;
+library IEEE;
+use IEEE.std_logic_1164.ALL;
+
+entity objandmove is
+   port(clk        : in  std_logic;
+        reset      : in  std_logic;
+        frame_ready		   : in  std_logic;
+        left		: in std_logic;
+	right		: in std_logic;
+	up		: in std_logic;
+	down		: in std_logic;
+        shoot      : in  std_logic;
+        spawn1      : in  std_logic;
+	spawn2      : in  std_logic;
+	spawn3      : in  std_logic;
+	spawn4      : in  std_logic;
+	spawn5      : in  std_logic;
+	spawn6      : in  std_logic;
         coll_enemy_1  : in  std_logic;
         coll_enemy_2  : in  std_logic;
         coll_enemy_3  : in  std_logic;
@@ -28,57 +25,13 @@ entity test is
         coll_bullet_1 : in  std_logic;
         coll_bullet_2 : in  std_logic;
         coll_bullet_3 : in  std_logic;
-        coll_player   : in  std_logic;
-        player_x      : out std_logic_vector(8 downto 0);
-        player_y      : out std_logic_vector(8 downto 0);
-        enemy_x_1     : out std_logic_vector(8 downto 0);
-        enemy_y_1     : out std_logic_vector(8 downto 0);
-        enemy_x_2     : out std_logic_vector(8 downto 0);
-        enemy_y_2     : out std_logic_vector(8 downto 0);
-        enemy_x_3     : out std_logic_vector(8 downto 0);
-        enemy_y_3     : out std_logic_vector(8 downto 0);
-        enemy_x_4     : out std_logic_vector(8 downto 0);
-        enemy_y_4     : out std_logic_vector(8 downto 0);
-        enemy_x_5     : out std_logic_vector(8 downto 0);
-        enemy_y_5     : out std_logic_vector(8 downto 0);
-        enemy_x_6     : out std_logic_vector(8 downto 0);
-        enemy_y_6     : out std_logic_vector(8 downto 0);
-        bullet_x_1    : out std_logic_vector(8 downto 0);
-        bullet_y_1    : out std_logic_vector(8 downto 0);
-        bullet_x_2    : out std_logic_vector(8 downto 0);
-        bullet_y_2    : out std_logic_vector(8 downto 0);
-        bullet_x_3    : out std_logic_vector(8 downto 0);
-        bullet_y_3    : out std_logic_vector(8 downto 0);
-        enemy_alive_1 : out std_logic;
-        enemy_alive_2 : out std_logic;
-        enemy_alive_3 : out std_logic;
-        enemy_alive_4 : out std_logic;
-        enemy_alive_5 : out std_logic;
-        enemy_alive_6 : out std_logic);
-end test;
-
-
-
-
-
-library IEEE;
-use IEEE.std_logic_1164.ALL;
-
-entity objandmove is
-   port(clk        : in  std_logic;
-        reset      : in  std_logic;
-        frame_ready		   : in  std_logic;
-        x_control  : in  std_logic_vector(1 downto 0);
-        y_control  : in  std_logic_vector(1 downto 0);
-        shoot      : in  std_logic;
-        spawn      : in  std_logic;
-        collision  : in  std_logic;
-        spawn1_x   : in  std_logic_vector(8 downto 0);
-        spawn1_y   : in  std_logic_vector(8 downto 0);
-	spawn2_x   : in  std_logic_vector(8 downto 0);
-        spawn2_y   : in  std_logic_vector(8 downto 0);
-	spawn3_x   : in  std_logic_vector(8 downto 0);
+        coll_player   : in  std_logic;       
+        spawn1_y   : in  std_logic_vector(8 downto 0);	
+        spawn2_y   : in  std_logic_vector(8 downto 0);	
         spawn3_y   : in  std_logic_vector(8 downto 0);
+	spawn4_y	: in std_logic_vector(8 downto 0);
+	spawn5_y	: in std_logic_vector(8 downto 0);
+	spawn6_y	: in std_logic_vector(8 downto 0);
         x_position   : out std_logic_vector(8 downto 0);
         y_position   : out std_logic_vector(8 downto 0);
         bullet_xposition1  : out std_logic_vector(8 downto 0);
@@ -87,9 +40,24 @@ entity objandmove is
         bullet_yposition2  : out std_logic_vector(8 downto 0);
         bullet_xposition3  : out std_logic_vector(8 downto 0);
         bullet_yposition3  : out std_logic_vector(8 downto 0);
-        enemy_xposition   : out std_logic_vector(8 downto 0);
-        enemy_yposition   : out std_logic_vector(8 downto 0);
-        alive      : out std_logic);
+        enemy_xposition1   : out std_logic_vector(8 downto 0);
+        enemy_yposition1   : out std_logic_vector(8 downto 0);
+	enemy_xposition2   : out std_logic_vector(8 downto 0);
+        enemy_yposition2   : out std_logic_vector(8 downto 0);
+	enemy_xposition3   : out std_logic_vector(8 downto 0);
+        enemy_yposition3   : out std_logic_vector(8 downto 0);
+	enemy_xposition4   : out std_logic_vector(8 downto 0);
+        enemy_yposition4   : out std_logic_vector(8 downto 0);
+	enemy_xposition5   : out std_logic_vector(8 downto 0);
+        enemy_yposition5   : out std_logic_vector(8 downto 0);
+	enemy_xposition6   : out std_logic_vector(8 downto 0);
+        enemy_yposition6   : out std_logic_vector(8 downto 0);
+        alive1      : out std_logic;
+	alive2      : out std_logic;
+	alive3      : out std_logic;
+	alive4      : out std_logic;
+	alive5      : out std_logic;
+	alive6      : out std_logic);
 end objandmove;
 
 architecture structural of objandmove is
@@ -99,8 +67,10 @@ architecture structural of objandmove is
 		port(	clk         : in  std_logic;
 			reset	    : in 	std_logic;
         			frame_ready : in  std_logic;
-        			x_control   : in  std_logic_vector(1 downto 0);
-        			y_control   : in  std_logic_vector(1 downto 0);
+        			left		: in  std_logic;
+        			right		: in  std_logic;
+				up   		: in  std_logic;
+        			down		: in  std_logic;
         			x_position  : out std_logic_vector(8 downto 0);
         			y_position  : out std_logic_vector(8 downto 0)
 		);
@@ -111,7 +81,7 @@ architecture structural of objandmove is
 		        reset       : in  std_logic;
 		        spawn       : in  std_logic;
 		        collision   : in  std_logic;
-		        x_spawn_pos : in  std_logic_vector(8 downto 0);
+		        
 		        y_spawn_pos : in  std_logic_vector(8 downto 0);
 		        alive       : out std_logic;
 		        enemy_xposition  : out std_logic_vector(8 downto 0);
@@ -153,13 +123,16 @@ architecture structural of objandmove is
 	signal 	shoot_bullet1, shoot_bullet2, shoot_bullet3					: std_logic;
 
 begin
-	player_movement :	player port map	(clk, reset, frame_ready, x_control, y_control, x_position, y_position);
-	enemy_movement1		: enemy 	port map	(clk, reset, spawn, collision, spawn1_x, spawn1_y, alive, enemy_xposition, enemy_yposition);
-	enemy_movement2		: enemy 	port map	(clk, reset, spawn, collision, spawn2_x, spawn2_y, alive, enemy_xposition, enemy_yposition);
-	enemy_movement3		: enemy 	port map	(clk, reset, spawn, collision, spawn3_x, spawn3_y, alive, enemy_xposition, enemy_yposition);
-	bullet1		: bullet 			port map	(clk, reset, shoot_bullet1, collision, frame_ready, player_xposition_bullet1, player_yposition_bullet1, bullet_state1, bullet_xposition1, bullet_yposition1);
-	bullet2		: bullet 			port map	(clk, reset, shoot_bullet2, collision, frame_ready, player_xposition_bullet2, player_yposition_bullet2, bullet_state2, bullet_xposition2, bullet_yposition2);
-	bullet3		: bullet 			port map	(clk, reset, shoot_bullet3, collision, frame_ready, player_xposition_bullet3, player_yposition_bullet3, bullet_state3, bullet_xposition3, bullet_yposition3);
+	player_movement :	player port map	(clk, reset, frame_ready, left, right, up, down, x_position, y_position);
+	enemy_movement1		: enemy 	port map	(clk, reset, spawn1, coll_enemy_1, spawn1_y, alive1, enemy_xposition1, enemy_yposition1);
+	enemy_movement2		: enemy 	port map	(clk, reset, spawn2, coll_enemy_2, spawn2_y, alive2, enemy_xposition2, enemy_yposition2);
+	enemy_movement3		: enemy 	port map	(clk, reset, spawn3, coll_enemy_3, spawn3_y, alive3, enemy_xposition3, enemy_yposition3);
+	enemy_movement4		: enemy 	port map	(clk, reset, spawn4, coll_enemy_4, spawn4_y, alive4, enemy_xposition4, enemy_yposition4);
+	enemy_movement5		: enemy 	port map	(clk, reset, spawn5, coll_enemy_5, spawn5_y, alive5, enemy_xposition5, enemy_yposition5);
+	enemy_movement6		: enemy 	port map	(clk, reset, spawn6, coll_enemy_6, spawn6_y, alive6, enemy_xposition6, enemy_yposition6);
+	bullet1		: bullet 			port map	(clk, reset, shoot_bullet1, coll_bullet_1, frame_ready, player_xposition_bullet1, player_yposition_bullet1, bullet_state1, bullet_xposition1, bullet_yposition1);
+	bullet2		: bullet 			port map	(clk, reset, shoot_bullet2, coll_bullet_2, frame_ready, player_xposition_bullet2, player_yposition_bullet2, bullet_state2, bullet_xposition2, bullet_yposition2);
+	bullet3		: bullet 			port map	(clk, reset, shoot_bullet3, coll_bullet_3, frame_ready, player_xposition_bullet3, player_yposition_bullet3, bullet_state3, bullet_xposition3, bullet_yposition3);
 	bullet_controller : control_bullet 					port map (clk, reset, shoot, bullet_state1, bullet_state2, bullet_state3, shoot_bullet1, shoot_bullet2, shoot_bullet3);
 
 end structural;
